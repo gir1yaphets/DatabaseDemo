@@ -1,24 +1,21 @@
 package com.example.pengxiaolve.databasedemo;
 
-import android.content.ContentUris;
-import android.content.ContentValues;
-import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 
-import com.example.pengxiaolve.databasedemo.db.Constant;
 import com.example.pengxiaolve.databasedemo.fragment.ContactFragment;
-import com.example.pengxiaolve.databasedemo.provider.ContactProvider;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements ContactFragment.ActivityCallbacks{
 
     private Button mInsertButton;
     private Button mdeleteButton;
     private Button mQueryButton;
 
-    private ContactFragment mContactFragment;
+    private Handler mHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,22 +49,25 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void insert() {
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(Constant.CONTACT_ID, 1);
-        contentValues.put(Constant.NAME, "Kite");
-        contentValues.put(Constant.PHONE, "110");
-
-        Uri uri = ContactProvider.CONTENT_URI;
-        getContentResolver().insert(uri, contentValues);
+        Message msg = new Message();
+        msg.what = ContactFragment.MESSAGE_INSERT;
+        mHandler.sendMessage(msg);
     }
 
     private void delete() {
-        Uri uri = ContentUris.withAppendedId(ContactProvider.CONTENT_URI, 1);
-        getContentResolver().delete(uri, null, null);
+        Message msg = new Message();
+        msg.what = ContactFragment.MESSAGE_DELETE;
+        mHandler.sendMessage(msg);
     }
 
     private void query() {
-        mContactFragment = (ContactFragment) getFragmentManager().findFragmentById(R.id.contactfragment);
-        getLoaderManager().restartLoader(0, null, mContactFragment.mCallbacks);
+        Message msg = new Message();
+        msg.what = ContactFragment.MESSAGE_QUERY;
+        mHandler.sendMessage(msg);
+    }
+
+    @Override
+    public void setHandler(Handler handler) {
+        this.mHandler = handler;
     }
 }
