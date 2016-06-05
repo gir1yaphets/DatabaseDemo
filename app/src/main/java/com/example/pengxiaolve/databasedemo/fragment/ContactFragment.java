@@ -6,19 +6,21 @@ import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.CursorLoader;
+import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.SimpleCursorAdapter;
 
-import com.example.pengxiaolve.databasedemo.MainActivity;
 import com.example.pengxiaolve.databasedemo.R;
+import com.example.pengxiaolve.databasedemo.activity.MainActivity;
 import com.example.pengxiaolve.databasedemo.db.Constant;
 import com.example.pengxiaolve.databasedemo.provider.ContactProvider;
 
@@ -30,6 +32,7 @@ public class ContactFragment extends ListFragment {
     private Context mContext;
     private SimpleCursorAdapter mAdapter;
     private Handler mHandler = new ClickListenerHandler();
+    private int mContact_ID = 1;
 
     public static final int MESSAGE_INSERT = 0;
     public static final int MESSAGE_QUERY = 1;
@@ -108,13 +111,13 @@ public class ContactFragment extends ListFragment {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MESSAGE_INSERT:
-                    handleInsert();
+                    handleInsert(msg);
                     break;
                 case MESSAGE_QUERY:
-                    handleQuery();
+                    handleQuery(msg);
                     break;
                 case MESSAGE_DELETE:
-                    handleDelete();
+                    handleDelete(msg);
                     break;
                 default:
                     break;
@@ -122,21 +125,32 @@ public class ContactFragment extends ListFragment {
         }
     }
 
-    private void handleInsert() {
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(Constant.CONTACT_ID, 1);
-        contentValues.put(Constant.NAME, "Kite");
-        contentValues.put(Constant.PHONE, "110");
+    private void handleInsert(Message msg) {
+        if (msg.obj != null) {
+            Intent intent = (Intent) msg.obj;
+            Bundle args = intent.getBundleExtra("contact");
+            String name = args.getString("name");
+            String phone = args.getString("phone");
 
-        Uri uri = ContactProvider.CONTENT_URI;
-        mContext.getContentResolver().insert(uri, contentValues);
+            if (!TextUtils.isEmpty(name)) {
+                ContentValues contentValues = new ContentValues();
+                contentValues.put(Constant.CONTACT_ID, mContact_ID);
+                contentValues.put(Constant.NAME, name);
+                contentValues.put(Constant.PHONE, phone);
+
+                Uri uri = ContactProvider.CONTENT_URI;
+                mContext.getContentResolver().insert(uri, contentValues);
+
+                mContact_ID += 1;
+            }
+        }
     }
-    private void handleDelete() {
-        Uri uri = ContentUris.withAppendedId(ContactProvider.CONTENT_URI, 1);
+    private void handleDelete(Message msg) {
+        Uri uri = ContentUris.withAppendedId(ContactProvider.CONTENT_URI, mContact_ID);
         mContext.getContentResolver().delete(uri, null, null);
     }
 
-    private void handleQuery() {
+    private void handleQuery(Message msg) {
         getLoaderManager().restartLoader(0, null, mCallbacks);
     }
 }

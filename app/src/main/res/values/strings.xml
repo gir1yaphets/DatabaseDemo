@@ -3,4 +3,7 @@
     <string name="insert">INSERT</string>
     <string name="delete">DELETE</string>
     <string name="query">QUERY</string>
+    <string name="name">姓名:</string>
+    <string name="phone">电话:</string>
+    <string name="add">添加</string>
 </resources>
